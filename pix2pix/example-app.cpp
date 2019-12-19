@@ -8,34 +8,35 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
-
+#include<fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <string>
 #include <Windows.h>
+#include <direct.h>
 
 using namespace std;
 
 class Dir
 {
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Dir(void) {}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~Dir(void) {}
 
-	// ƒtƒ@ƒCƒ‹ˆê——æ“¾
-	// folder : ƒtƒHƒ‹ƒ_‚Ìâ‘ÎƒpƒX‚ğ“ü—Í‚Æ‚·‚é 
-	// —á : "D:\\Users\\Pictures\\"
+	// ãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§å–å¾—
+	// folder : ãƒ•ã‚©ãƒ«ãƒ€ã®çµ¶å¯¾ãƒ‘ã‚¹ã‚’å…¥åŠ›ã¨ã™ã‚‹
+	// ä¾‹ : "D:\\Users\\Pictures\\"
 	static vector<string> read(string folder) {
-		// éŒ¾
+		// å®£è¨€
 		vector<string> fileList;
 		HANDLE hFind;
 		WIN32_FIND_DATA fd;
 
-		// ƒtƒ@ƒCƒ‹–¼ŒŸõ‚Ì‚½‚ß‚ÉƒƒCƒ‹ƒhƒJ[ƒh’Ç‰Á
-		// —á : "D:\\Users\\Pictures\\*.*"
+		// ãƒ•ã‚¡ã‚¤ãƒ«åæ¤œç´¢ã®ãŸã‚ã«ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰è¿½åŠ 
+		// ä¾‹ : "D:\\Users\\Pictures\\*.*"
 		stringstream ss;
 		ss << folder;
 		string::iterator itr = folder.end();
@@ -43,39 +44,44 @@ public:
 		if (*itr != '\\') ss << '\\';
 		ss << "*.*";
 
-		// ƒtƒ@ƒCƒ‹’Tõ
-		// FindFirstFile(ƒtƒ@ƒCƒ‹–¼, &fd);
+		// ãƒ•ã‚¡ã‚¤ãƒ«æ¢ç´¢
+		// FindFirstFile(ãƒ•ã‚¡ã‚¤ãƒ«å, &fd);
 		hFind = FindFirstFile(ss.str().c_str(), &fd);
 
-		// ŒŸõ¸”s
+		// æ¤œç´¢å¤±æ•—
 		if (hFind == INVALID_HANDLE_VALUE) {
-			std::cout << "ƒtƒ@ƒCƒ‹ˆê——‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½" << std::endl;
-			exit(1); // ƒGƒ‰[I—¹
+			std::cout << "ãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸ" << std::endl;
+			exit(1); // ã‚¨ãƒ©ãƒ¼çµ‚äº†
 		}
 
-		// ƒtƒ@ƒCƒ‹–¼‚ğƒŠƒXƒg‚ÉŠi”[‚·‚é‚½‚ß‚Ìƒ‹[ƒv
+		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒªã‚¹ãƒˆã«æ ¼ç´ã™ã‚‹ãŸã‚ã®ãƒ«ãƒ¼ãƒ—
 		do {
-			// ƒtƒHƒ‹ƒ_‚Íœ‚­
+			// ãƒ•ã‚©ãƒ«ãƒ€ã¯é™¤ã
 			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				&& !(fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
 			{
-				//ƒtƒ@ƒCƒ‹–¼‚ğƒŠƒXƒg‚ÉŠi”[
+				//ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒªã‚¹ãƒˆã«æ ¼ç´
 				char *file = fd.cFileName;
 				string str = file;
 				fileList.push_back(str);
 			}
-		} while (FindNextFile(hFind, &fd)); //Ÿ‚Ìƒtƒ@ƒCƒ‹‚ğ’Tõ
+		} while (FindNextFile(hFind, &fd)); //æ¬¡ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ¢ç´¢
 
-		// hFind‚ÌƒNƒ[ƒY
+		// hFindã®ã‚¯ãƒ­ãƒ¼ã‚º
 		FindClose(hFind);
 
 		return fileList;
 	}
 };
 
+bool checkFileExistence(const std::string& str)
+{
+	std::ifstream ifs(str);
+	return ifs.is_open();
+}
 
 //at::Tensor  maketensor(cv::Mat pm_images) {
-//	// Module‚É“ü—Í‚·‚éat::Tensor‚ÌŸŒ³‚ğ’è‹`
+//	// Moduleã«å…¥åŠ›ã™ã‚‹at::Tensorã®æ¬¡å…ƒã‚’å®šç¾©
 //	int channel = pm_images.channels();
 //	const int height = pm_images.rows;
 //	const int width = pm_images.cols;
@@ -84,12 +90,12 @@ public:
 //							  static_cast<int64_t>(height), // h=512
 //							  static_cast<int64_t>(width) }; // w=512
 //
-//	// “ü—ÍTensor‚É•ÏŠ·‚·‚é—\’è‚Ìcv::Mat‚ğì‚Á‚Ä‚¨‚­D
-//	// cv::Mat‚ÌƒTƒCƒY‚à“ü—Í‚Ìat::Tensor‚É‡‚í‚¹‚Ä‚¨‚­
+//	// å…¥åŠ›Tensorã«å¤‰æ›ã™ã‚‹äºˆå®šã®cv::Matã‚’ä½œã£ã¦ãŠãï¼
+//	// cv::Matã®ã‚µã‚¤ã‚ºã‚‚å…¥åŠ›ã®at::Tensorã«åˆã‚ã›ã¦ãŠã
 //	cv::Mat mf_input = cv::Mat::zeros(height*channel , width, CV_32FC1);
 //
-//	// OpenCV‚Å‚ÍRGB‚Å‚Í‚È‚­BGR‚Ì‡‚É’l‚ª“ü‚Á‚Ä‚¢‚é‚Ì‚ÅC“ü‚ê‘Ö‚¦‚é
-//	// DepthNet–{‰Æ‚ª‚â‚Á‚Ä‚¢‚é‚æ‚¤‚È‰º€”õ‚à‚±‚±‚Ås‚¤D
+//	// OpenCVã§ã¯RGBã§ã¯ãªãBGRã®é †ã«å€¤ãŒå…¥ã£ã¦ã„ã‚‹ã®ã§ï¼Œå…¥ã‚Œæ›¿ãˆã‚‹
+//	// DepthNetæœ¬å®¶ãŒã‚„ã£ã¦ã„ã‚‹ã‚ˆã†ãªä¸‹æº–å‚™ã‚‚ã“ã“ã§è¡Œã†ï¼
 //	cv::Mat m_bgr[3], mf_rgb_rgb[3];
 //	cv::split(pm_images, m_bgr);
 //	for (int i = 0; i < 3; i++) {
@@ -99,13 +105,13 @@ public:
 //
 //
 //
-//	// at::Tensor‚É•ÏŠ·—\’è‚Ìcv::Mat‚É’l‚ğƒRƒs[‚µ‚Ä‚¢‚­D
+//	// at::Tensorã«å¤‰æ›äºˆå®šã®cv::Matã«å€¤ã‚’ã‚³ãƒ”ãƒ¼ã—ã¦ã„ãï¼
 //	for (int i = 0; i < 3; i++) {
 //		mf_rgb_rgb[i].copyTo(mf_input.rowRange(i*height, (i + 1)*height));
 //	}
 //
 //
-//	// “ü—Í‚Æ‚È‚éat::Tensor‚ğ¶¬
+//	// å…¥åŠ›ã¨ãªã‚‹at::Tensorã‚’ç”Ÿæˆ
 //	at::TensorOptions options(at::kFloat);
 //	at::Tensor input_tensor = torch::from_blob(mf_input.data, at::IntList(dims), options);
 //	//std::cout << input_tensor << std::endl;
@@ -117,8 +123,8 @@ public:
 //{
 //	using namespace std;
 //
-//	// —v‘f‚ÌŒ^‚Æƒ`ƒƒƒ“ƒlƒ‹”‚Ì‘g‚İ‡‚í‚¹B
-//	// †–Ê‚Ì“s‡‚É‚æ‚èAƒTƒ“ƒvƒ‹‚Åg—p‚·‚é’l‚Ì‚İ‹Lq
+//	// è¦ç´ ã®å‹ã¨ãƒãƒ£ãƒ³ãƒãƒ«æ•°ã®çµ„ã¿åˆã‚ã›ã€‚
+//	// ç´™é¢ã®éƒ½åˆã«ã‚ˆã‚Šã€ã‚µãƒ³ãƒ—ãƒ«ã§ä½¿ç”¨ã™ã‚‹å€¤ã®ã¿è¨˜è¿°
 //	cout << "type: " << (
 //		mat.type() == CV_8UC3 ? "CV_8UC3" :
 //		mat.type() == CV_16SC1 ? "CV_16SC1" :
@@ -127,7 +133,7 @@ public:
 //		"other"
 //		) << endl;
 //
-//	// —v‘f‚ÌŒ^
+//	// è¦ç´ ã®å‹
 //	cout << "depth: " << (
 //		mat.depth() == CV_8U ? "CV_8U" :
 //		mat.depth() == CV_16S ? "CV_16S" :
@@ -135,27 +141,27 @@ public:
 //		"other"
 //		) << endl;
 //
-//	// ƒ`ƒƒƒ“ƒlƒ‹”
+//	// ãƒãƒ£ãƒ³ãƒãƒ«æ•°
 //	cout << "channels: " << mat.channels() << endl;
 //
-//	// ƒoƒCƒg—ñ‚ª˜A‘±‚µ‚Ä‚¢‚é‚©
+//	// ãƒã‚¤ãƒˆåˆ—ãŒé€£ç¶šã—ã¦ã„ã‚‹ã‹
 //	cout << "continuous: " <<
 //		(mat.isContinuous() ? "true" : "false") << endl;
 //}
 //
 //int getminmax(cv::Mat in) {
 //
-//	//Å‘å‚ÆÅ¬‚Ì‰Šú’l‚ğİ’èimin‚ª“K“–‚È‚Ì‚Í‚â‚Î‚»‚¤j
+//	//æœ€å¤§ã¨æœ€å°ã®åˆæœŸå€¤ã‚’è¨­å®šï¼ˆminãŒé©å½“ãªã®ã¯ã‚„ã°ãã†ï¼‰
 //	double max = 0;
 //	double min = 9999;
 //
-//	//‚ß‚ñ‚Ç‚­‚³‚¢‚©‚ç“ü—Í‰æ‘œ‚ğclone
+//	//ã‚ã‚“ã©ãã•ã„ã‹ã‚‰å…¥åŠ›ç”»åƒã‚’clone
 //	cv::Mat out = in.clone();
 //
-//	//Å‘å‚ÆÅ¬‚ğæ“¾
+//	//æœ€å¤§ã¨æœ€å°ã‚’å–å¾—
 //	for (int y = 0; y < in.rows; ++y) {
 //		for (int x = 0; x < in.cols; ++x) {
-//			// ‰æ‘œ‚Ìƒ`ƒƒƒlƒ‹”•ª‚¾‚¯ƒ‹[ƒvB”’•‚Ìê‡‚Í1‰ñAƒJƒ‰[‚Ìê‡‚Í3‰ñ@@@@@
+//			// ç”»åƒã®ãƒãƒ£ãƒãƒ«æ•°åˆ†ã ã‘ãƒ«ãƒ¼ãƒ—ã€‚ç™½é»’ã®å ´åˆã¯1å›ã€ã‚«ãƒ©ãƒ¼ã®å ´åˆã¯3å›ã€€ã€€ã€€ã€€ã€€
 //			for (int c = 0; c < in.channels(); ++c) {
 //				float intensity = in.data[y * in.step + x * in.elemSize() + c];
 //
@@ -180,7 +186,7 @@ public:
 //}
 //at::Tensor tanh(cv::Mat in, std::vector<int64_t> dims) {
 //
-//	//‚ß‚ñ‚Ç‚­‚³‚¢‚©‚ç“ü—Í‰æ‘œ‚ğclone
+//	//ã‚ã‚“ã©ãã•ã„ã‹ã‚‰å…¥åŠ›ç”»åƒã‚’clone
 //	cv::Mat out; //= in.clone();
 //	in.convertTo(out, CV_32FC3, 1.0/255);
 //
@@ -197,7 +203,7 @@ public:
 //	//cv::Mat mat(256, 256, CV_32FC3, tensor_image. template data<float>());
 //
 //
-//	//-1~1‚É‚È‚Á‚½Mat‚ğ•Ô‚·
+//	//-1~1ã«ãªã£ãŸMatã‚’è¿”ã™
 //	return input_tensor;
 //}
 //at::Tensor  untanh(at::Tensor in) {
@@ -211,20 +217,20 @@ public:
 //
 //
 //
-//	//0~255‚É‚È‚Á‚½Mat‚ğ•Ô‚·
+//	//0~255ã«ãªã£ãŸMatã‚’è¿”ã™
 //	return in;
 //}
-///* ‰æ‘œ‚Ì•\¦‚ÌƒTƒ“ƒvƒ‹ƒR[ƒh C++”Å */
+///* ç”»åƒã®è¡¨ç¤ºã®ã‚µãƒ³ãƒ—ãƒ«ã‚³ãƒ¼ãƒ‰ C++ç‰ˆ */
 //int sample_DisplayImage_Cpp(cv::Mat showimg) {
 //	
 //
 //
-//	/* ƒEƒBƒ“ƒhƒE‚Ìì¬ */
+//	/* ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ä½œæˆ */
 //	cv::namedWindow("lenna", CV_WINDOW_AUTOSIZE);
-//	/* ‰æ‘œ‚Ì•\¦ */
+//	/* ç”»åƒã®è¡¨ç¤º */
 //	cv::imshow("lenna", showimg);
 //
-//	/* ƒL[“ü—Í‘Ò‚¿ */
+//	/* ã‚­ãƒ¼å…¥åŠ›å¾…ã¡ */
 //	cv::waitKey(0);
 //
 //
@@ -232,12 +238,12 @@ public:
 //	return 0;
 //}
 //void tensor2img(at::Tensor output_tensor) {
-//	// o—Í‚Ìat::Tensor‚ğcv::Mat‚ÖŠi”[
+//	// å‡ºåŠ›ã®at::Tensorã‚’cv::Matã¸æ ¼ç´
 //	cv::Mat m_output(cv::Size(output_tensor.size(2)/*128*/, output_tensor.size(3)/*128*/), CV_32FC3, output_tensor.data<float>());
 //	cv::Mat m_depth = m_output.clone();
 //	cv::Mat m_upscaled_depth;
 //	cv::resize(m_depth, m_upscaled_depth, cv::Size(output_tensor.size(1)/*512*/, output_tensor.size(2)/*512*/), 0, 0);
-//	const float max_value = 255; // DepthNet–{‰Æ‚ªŒˆ‚ß‚Ä‚½
+//	const float max_value = 255; // DepthNetæœ¬å®¶ãŒæ±ºã‚ã¦ãŸ
 //	cv::Mat m_arranged_depth = (128.0*m_upscaled_depth) + 128.0;
 //	for (int i = 0; i < m_arranged_depth.rows; i++) {
 //		for (int j = 0; j < m_arranged_depth.cols; j++) {
@@ -255,13 +261,13 @@ public:
 //}
 //
 //std::vector<torch::jit::IValue> imgread(std::string path) {
-//	// “ü—Í‰æ‘œ‚ğƒyƒA‚Å“Ç‚İ‚Ş
+//	// å…¥åŠ›ç”»åƒã‚’ãƒšã‚¢ã§èª­ã¿è¾¼ã‚€
 //	auto pm_images =(cv::imread(path, 1));
 //	//sample_DisplayImage_Cpp(pm_images);
 //	//getminmax(pm_images);
 //	//pm_images = tanh(pm_images);
 //	//getminmax(pm_images);
-//	// Module‚É“ü—Í‚·‚éat::Tensor‚ÌŸŒ³‚ğ’è‹`
+//	// Moduleã«å…¥åŠ›ã™ã‚‹at::Tensorã®æ¬¡å…ƒã‚’å®šç¾©
 //	const int channel = pm_images.channels();
 //	const int height = pm_images.rows;
 //	const int width = pm_images.cols;
@@ -279,7 +285,7 @@ public:
 //
 //	at::Tensor input_tensor = maketensor(pm_images);
 //
-//	// “ü—Í‚Æ‚È‚éat::Tensor‚ğ¶¬
+//	// å…¥åŠ›ã¨ãªã‚‹at::Tensorã‚’ç”Ÿæˆ
 //	at::TensorOptions options(at::kFloat);
 //	std::vector<torch::jit::IValue> input_img;
 //	torch::DeviceType device_type = torch::kCUDA;
@@ -296,16 +302,9 @@ public:
 //	return(input_img);
 //}
 int main(int argc, const char* argv[]){
+
 	PytorchModel pm;
 	pm.ShowMessage(" Start!");
-
-	// ƒtƒ@ƒCƒ‹“ü—Í
-	std::vector<std::string> backfilelist = Dir::read("D:\\ALS\\TM\\train\\input_abs\\");
-	for (int i = 0; i < backfilelist.size(); i++) {
-		std::cout << backfilelist[i] << std::endl;
-	}
-	return 0;
-
 
 	try {
 		pm.LoadModel();
@@ -318,45 +317,75 @@ int main(int argc, const char* argv[]){
 	pm.ShowMessage(" Model Loading passed!");
 
 
-	/* ReadImage And Sliding Window */
-	cv::Mat DrawResultGrid =  (cv::imread("./test.png", 1));
 
-	std::cout << DrawResultGrid.size() << std::endl;
-	std::cout << DrawResultGrid.channels() << std::endl;
-	std::cout << DrawResultGrid.type() << std::endl;
+	// ãƒ•ã‚¡ã‚¤ãƒ«å…¥åŠ›
+	std::string target_path = "D:\\ALS\\TM\\train\\input_abs\\";
+	std::string result_path = target_path + "/result/";
+	bool is_file = checkFileExistence(result_path);
+	if (is_file == false)  _mkdir(result_path.c_str());
 
-	// Cycle row step
-	for (int row = 0; row <= DrawResultGrid.rows - pm.windows_n_rows; row += pm.StepSlide)
-	{
-		// Cycle col step
-		for (int col = 0; col <= DrawResultGrid.cols - pm.windows_n_cols; col += pm.StepSlide)
-		{
-			// There could be feature evaluator  over Windows
-
-			// resulting window   
-			cv::Rect windows(col, row, pm.windows_n_rows, pm.windows_n_cols);
-
-
-			cv::Mat Roi = DrawResultGrid(windows);
-
-			std::vector<torch::jit::IValue>  tmp_imput;
-			tmp_imput = pm.SetTensor(Roi);
-			pm.Prediction(tmp_imput);
-			cv::Mat tmp_output = pm.UnTanh();
-			tmp_output.copyTo(DrawResultGrid.rowRange(col, col + pm.windows_n_rows).colRange(row , row + pm.windows_n_cols));
-			
+	std::vector<std::string> backfilelist = Dir::read(target_path);
+	for (int i = 0; i < backfilelist.size(); i++) {
+		std::cout << backfilelist[i] << std::endl;
+		std::string image = "D:\\ALS\\TM\\train\\input_abs\\" + backfilelist[i] ;
+		cv::Mat DrawResultGrid;
+		/* ReadImage And Sliding Window */
+		try {
+			DrawResultGrid = (cv::imread(image, 1));
 		}
-	}
-	cv::imwrite("./all.jpg", DrawResultGrid);
-	try {
-		pm.ReadImage("./00000016.png");
-	}
-	catch (const c10::Error& e) {
-		pm.ShowMessage("Image Reading error!");
-		std::cerr << e.what();
+		catch (const c10::Error& e) {
+			pm.ShowMessage("Image Reading error!");
+			std::cerr << e.what();
+		}
+		std::cout << DrawResultGrid.size() << std::endl;
+		std::cout << DrawResultGrid.channels() << std::endl;
+		std::cout << DrawResultGrid.type() << std::endl;
+
+		// Cycle row step
+		for (int row = 0; row <= DrawResultGrid.rows - pm.windows_n_rows; row += pm.StepSlide)
+		{
+			// Cycle col step
+			for (int col = 0; col <= DrawResultGrid.cols - pm.windows_n_cols; col += pm.StepSlide)
+			{
+				// There could be feature evaluator  over Windows
+
+				// resulting window  
+
+				cv::Rect windows(col, row, pm.windows_n_rows, pm.windows_n_cols);
+
+				cv::Mat Roi = DrawResultGrid(windows);
+
+				std::vector<torch::jit::IValue>  tmp_imput;
+				tmp_imput = pm.SetTensor(Roi);
+				pm.Prediction(tmp_imput);
+				cv::Mat tmp_output = pm.UnTanh();
+				tmp_output.copyTo(DrawResultGrid.rowRange(col, col + pm.windows_n_rows).colRange(row, row + pm.windows_n_cols));
+
+			}
+		}
+		//save image
+		std::string savename = target_path + backfilelist[i];
+		cv::imwrite(savename, DrawResultGrid);
+		//try {
+		//	pm.ReadImage("./00000016.png");tu
+		//}
+		//catch (const c10::Error& e) {
+		//	pm.ShowMessage("Image Reading error!");
+		//	std::cerr << e.what();
+
+		//}
+		//pm.ShowMessage("Image Reading passed!");
 
 	}
-	pm.ShowMessage("Image Reading passed!");
+	return 0;
+
+
+
+
+
+	
+
+
 
 	//try {
 	//	//std::cout << pm.input_tensor << std::endl;
@@ -370,42 +399,42 @@ int main(int argc, const char* argv[]){
 	//}
 	//pm.ShowMessage("PredictionForOriginalImage passed!");
 
-	std::vector<torch::jit::IValue>  input;
-	try {
-		input = pm.SetTensor(pm.original_img);
-	}
-	catch (const c10::Error& e) {
-		pm.ShowMessage("Set Tensor error!");
-		std::cerr << e.what();
+	//std::vector<torch::jit::IValue>  input;
+	//try {
+	//	input = pm.SetTensor(pm.original_img);
+	//}
+	//catch (const c10::Error& e) {
+	//	pm.ShowMessage("Set Tensor error!");
+	//	std::cerr << e.what();
 
-	}
-	pm.ShowMessage("Set Tensor passed!");
-
-
-
-	try {
-		//std::cout << pm.input_tensor << std::endl;
-		pm.Prediction(input);
-		//std::cout << pm.output_tensor << std::endl;
-	}
-	catch (const c10::Error& e) {
-		pm.ShowMessage("Prediction error!");
-		std::cerr << e.what();
-
-	}
-	pm.ShowMessage("Prediction passed!");	
+	//}
+	//pm.ShowMessage("Set Tensor passed!");
 
 
-	try {
-		cv::Mat m_output = pm.UnTanh();
-		cv::imwrite("./pred.jpg", m_output);
-	}
-	catch (const c10::Error& e) {
-		pm.ShowMessage("UnTanh error!");
-		std::cerr << e.what();
 
-	}
-	pm.ShowMessage("UnTanh passed!");
+	//try {
+	//	//std::cout << pm.input_tensor << std::endl;
+	//	pm.Prediction(input);
+	//	//std::cout << pm.output_tensor << std::endl;
+	//}
+	//catch (const c10::Error& e) {
+	//	pm.ShowMessage("Prediction error!");
+	//	std::cerr << e.what();
+
+	//}
+	//pm.ShowMessage("Prediction passed!");	
+
+
+	//try {
+	//	cv::Mat m_output = pm.UnTanh();
+	//	cv::imwrite("./pred.jpg", m_output);
+	//}
+	//catch (const c10::Error& e) {
+	//	pm.ShowMessage("UnTanh error!");
+	//	std::cerr << e.what();
+
+	//}
+	//pm.ShowMessage("UnTanh passed!");
 
 }
 
@@ -439,7 +468,7 @@ int main(int argc, const char* argv[]){
 //	torch::Device device(device_type);
 //	module.to(device);
 //
-//	//// “ü—Í‚Æ‚È‚éat::Tensor‚ğì‚é [1 x 3 x 512 x 512]
+//	//// å…¥åŠ›ã¨ãªã‚‹at::Tensorã‚’ä½œã‚‹ [1 x 3 x 512 x 512]
 //	//std::vector<torch::jit::IValue> input;
 //	//input.push_back(torch::ones({ 1, 3, 256, 256 }).to(device));
 //	//
@@ -450,7 +479,7 @@ int main(int argc, const char* argv[]){
 //	////	<< " x " << input.size(3)
 //	////	<< "]\n";
 //
-//	//// Module‚ğÀs‚µCo—Í‚ğó‚¯æ‚é
+//	//// Moduleã‚’å®Ÿè¡Œã—ï¼Œå‡ºåŠ›ã‚’å—ã‘å–ã‚‹
 //    at::Tensor output_tensor = torch::ones({ 1, 3, 256, 256 });
 //	output_tensor.to(device);
 //	//std::cout << "dim = [" << output_tensor.size(0)
@@ -461,7 +490,7 @@ int main(int argc, const char* argv[]){
 //	//try {
 //	//	output_tensor = module.forward({ input }).toTensor();
 //	//	//at::Tensor output_tensor = module.forward({ input }).toTensor();
-//	//	// o—ÍTensor‚ÌŸŒ³‚ğŠm”F (DepthNet‚¾‚Æ [1 x 128 x 128])
+//	//	// å‡ºåŠ›Tensorã®æ¬¡å…ƒã‚’ç¢ºèª (DepthNetã ã¨ [1 x 128 x 128])
 //	//	std::cout << "dim = [" << output_tensor.size(0)
 //	//		<< " x " << output_tensor.size(1)
 //	//		<< " x " << output_tensor.size(2)
@@ -507,7 +536,7 @@ int main(int argc, const char* argv[]){
 //		output_tensor = module.forward({ imgtensor }).toTensor();
 //		//std::cout << "output_tensor [" << output_tensor  << "]\n";
 //
-//		// o—ÍTensor‚ÌŸŒ³‚ğŠm”F (DepthNet‚¾‚Æ [1 x 128 x 128])
+//		// å‡ºåŠ›Tensorã®æ¬¡å…ƒã‚’ç¢ºèª (DepthNetã ã¨ [1 x 128 x 128])
 //		std::cout << "dim = [" << output_tensor.size(0)
 //			<< " x " << output_tensor.size(1)
 //			<< " x " << output_tensor.size(2)
@@ -525,7 +554,7 @@ int main(int argc, const char* argv[]){
 //
 //	try {
 //
-//		// o—Í‚Ìat::Tensor‚ğcv::Mat‚ÖŠi”[
+//		// å‡ºåŠ›ã®at::Tensorã‚’cv::Matã¸æ ¼ç´
 //		std::vector<int64_t> mydims{ static_cast<int64_t>(1), // 1
 //						  static_cast<int64_t>(3), // 3
 //						  static_cast<int64_t>(256), // h=512
@@ -563,4 +592,7 @@ int main(int argc, const char* argv[]){
 //	std::cout << "save img	ok\n";
 //
 //}
+
+
+
 
